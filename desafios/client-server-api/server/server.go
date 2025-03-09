@@ -49,7 +49,7 @@ func main() {
 
 func initServerMux() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/cotacao", ExchangeUSDBRLHandler)
+	mux.HandleFunc("/cotacao", exchangeUSDBRLHandler)
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
 		panic(err)
@@ -91,7 +91,7 @@ func insertDocument(exchangeUSDBRL *ExchangeUSDBRL) error {
 	return nil
 }
 
-func ExchangeUSDBRLHandler(w http.ResponseWriter, r *http.Request) {
+func exchangeUSDBRLHandler(w http.ResponseWriter, r *http.Request) {
 	exchangeUSDBRL, err := getExchangeUSDBRL()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -101,7 +101,7 @@ func ExchangeUSDBRLHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(CotacaoResponse{exchangeUSDBRL.USDBRL.Bid})
 
-	insertDocument(exchangeUSDBRL)
+	go insertDocument(exchangeUSDBRL)
 }
 
 func getExchangeUSDBRL() (*ExchangeUSDBRL, error) {
