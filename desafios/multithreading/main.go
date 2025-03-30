@@ -31,7 +31,7 @@ func process(ch chan Response, url string) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			ch <- Response{Err: fmt.Errorf("Timeout!")}
+			ch <- Response{Err: errors.New("Timeout!")}
 		} else {
 			ch <- Response{Err: err}
 		}
