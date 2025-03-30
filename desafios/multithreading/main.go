@@ -19,7 +19,7 @@ type Response struct {
 }
 
 func process(ch chan Response, url string) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -30,7 +30,11 @@ func process(ch chan Response, url string) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		ch <- Response{Err: err}
+		if ctx.Err() == context.DeadlineExceeded {
+			ch <- Response{Err: fmt.Errorf("Timeout!")}
+		} else {
+			ch <- Response{Err: err}
+		}
 		return
 	}
 	defer resp.Body.Close()
@@ -64,21 +68,21 @@ func validateJSON(content string) error {
 		return err
 	}
 
-	//brasilapi - Exemplo de mensagem de erro para CEP 12345678 onde a API nao consegue processar e retorna erro em formato JSON
-	// "message":"Todos os serviços de CEP retornaram erro.",
+	//brasilapi - Exemplo de mensagem de erro para CEP 12345678 invalido
+	// {"message":"Todos os serviços de CEP retornaram erro.",
 	// "type":"service_error","name":"CepPromiseError",
 	// "errors":[
 	// 	{"name":"ServiceError","message":"A autenticacao de null falhou!","service":"correios"},
 	// 	{"name":"ServiceError","message":"Cannot read properties of undefined (reading 'replace')","service":"viacep"},
 	// 	{"name":"ServiceError","message":"Erro ao se conectar com o serviço WideNet.","service":"widenet"},
-	// 	{"name":"ServiceError","message":"CEP não encontrado na base dos Correios.","service":"correios-alt"}]
+	// 	{"name":"ServiceError","message":"CEP não encontrado na base dos Correios.","service":"correios-alt"}]}
 	_, result := jsonMap["errors"]
 	if result {
 		return errors.New(content)
 	}
 
-	//viacep - Exemplo de mensagem de erro para CEP 12345678 onde a API nao consegue processar e retorna erro em formato JSON
-	// "erro":"true",
+	//viacep - Exemplo de mensagem de erro para CEP 12345678 invalido
+	// {"erro":"true"}
 	_, result = jsonMap["erro"]
 	if result {
 		return errors.New(content)
