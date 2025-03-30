@@ -52,6 +52,7 @@ func process(ch chan Response, url string) {
 	err = validateJSON(json.Body)
 	if err != nil {
 		ch <- Response{Err: err}
+		return
 	}
 	ch <- json
 }
