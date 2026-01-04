@@ -105,3 +105,19 @@ go run server.go
 - [Gin Web Framework](https://github.com/gin-gonic/gin) - Framework HTTP
 - [ViaCEP API](https://viacep.com.br/) - Consulta de CEP
 - [WeatherAPI](https://www.weatherapi.com/) - Dados climáticos
+
+## Nota sobre Google Cloud Run
+
+**⚠️ Deploy não disponibilizado via Google Cloud Run**
+
+O projeto **não está deployado no Google Cloud Run** por razões de viabilidade financeira. O modelo de preços do Google Cloud Run:
+
+- **Antes**: Free tier verdadeiramente gratuito
+- **Agora**: Requer **prepagamento mínimo de R$ 200** mesmo para usar o free tier “teste gratuito”, sendo creditado como saldo normal. (04/01/2026)
+
+Para fazer deploy do serviço no Google Cloud Run, seria necessário:
+1. Criar uma conta Google Cloud
+2. Configurar conta de faturamento
+3. Efetuar o deploy via `gcloud run deploy`
+
+Se deseja explorar essa opção, consulte a [documentação do Google Cloud Run](https://cloud.google.com/run/docs).
