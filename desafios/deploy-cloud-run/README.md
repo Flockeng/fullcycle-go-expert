@@ -94,6 +94,59 @@ go run server.go
 
 - `WEATHER_API_KEY` (obrigatório): Chave de API do WeatherAPI
 
+## Testes
+
+O projeto inclui testes unitários abrangentes em [cmd/server/server_test.go](cmd/server/server_test.go).
+
+### Executar Testes
+
+```bash
+cd cmd/server
+go test -v
+```
+
+### Testes com Cobertura
+
+```bash
+cd cmd/server
+go test -v -cover
+```
+
+Para gerar relatório detalhado de cobertura:
+```bash
+go test -coverprofile=coverage.out
+go tool cover -html=coverage.out
+```
+
+### Cobertura de Testes
+
+Os testes cobrem os seguintes cenários:
+
+**Helper Functions:**
+- `TestIsValidString` — Valida strings vazias, com espaços e válidas
+- `TestRound` — Testa arredondamento com diferentes precisões
+- `BenchmarkRound` — Benchmark da função de arredondamento
+- `BenchmarkIsValidString` — Benchmark da validação de string
+
+**API Endpoint:**
+- `TestGetWeatherByZipCode_InvalidZipcode` — Rejeita CEP com formato inválido (< 8, > 8, com letras, com espaços)
+- Retorna status 422 com mensagem "invalid zipcode"
+
+**fetchTemperature:**
+- `TestFetchTemperature_MissingAPIKey` — Valida erro quando `WEATHER_API_KEY` não está definida
+- `TestFetchTemperature_Success` — Testa requisição bem-sucedida com mock server
+- `TestFetchTemperature_Non200Status` — Testa tratamento de erro HTTP não-200
+- `TestFetchTemperature_InvalidJSON` — Testa tratamento de resposta JSON inválida
+
+**fetchLocationFromZipCode:**
+- `TestFetchLocationFromZipCode_Success` — Testa sucesso na consulta de CEP
+- `TestFetchLocationFromZipCode_EmptyLocalidade` — Rejeita localidade vazia
+- `TestFetchLocationFromZipCode_EmptyEstado` — Rejeita estado vazio
+
+### Mocking
+
+Os testes usam mocking para HTTP requests através da variável global `httpGet` que pode ser substituída por uma função mock usando `patchHTTPGet()`.
+
 ## Arquitetura
 
 - **Build Stage**: Golang 1.23 com compilação estática (CGO_ENABLED=0)
