@@ -23,6 +23,8 @@ type WeatherResponse struct {
 	} `json:"current"`
 }
 
+var httpGet = http.Get
+
 func main() {
 	router := gin.Default()
 	router.GET("/v1/zipweather/:zipcode", getWeatherByZipCode)
@@ -66,7 +68,7 @@ func getWeatherByZipCode(c *gin.Context) {
 
 func fetchLocationFromZipCode(paramZipCode string) (*LocalidadeResponse, error) {
 	url := fmt.Sprintf("https://viacep.com.br/ws/%s/json", paramZipCode)
-	resp, err := http.Get(url)
+	resp, err := httpGet(url)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func fetchTemperature(city string, state string, country string) (float64, error
 
 	url := fmt.Sprintf("https://api.weatherapi.com/v1/current.json?key=%s&q=%s&lang=pt", apiKey, query)
 
-	resp, err := http.Get(url)
+	resp, err := httpGet(url)
 	if err != nil {
 		return 0, err
 	}
