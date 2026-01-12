@@ -161,6 +161,36 @@ curl http://localhost:8080/auction/winner/a8f062c1-572e-43a0-9b4f-669034f817fa
 
 ## 🧪 Testes
 
+### ⚠️ Importante: Banco de Dados para Testes
+
+**IMPORTANTE**: Os testes devem ser executados em um banco de dados separado para não afetar os dados do ambiente de produção/desenvolvimento.
+
+Em um ambiente de produção real, é essencial ter a separação de ambientes:
+- **Produção**: Banco de dados com dados reais dos usuários
+- **Homologação**: Banco de dados para validação antes de ir para produção
+- **Testes**: Banco de dados isolado exclusivamente para execução de testes
+
+O teste `create_auction_test.go` realiza operações de limpeza e criação de dados que podem afetar o banco de dados utilizado. Portanto, **sempre configure as variáveis de ambiente para apontar para um banco de testes separado**.
+
+### Configuração do Banco de Testes
+
+Para executar os testes em um banco separado, configure as seguintes variáveis de ambiente antes de executar os testes:
+
+```bash
+export MONGODB_URL="mongodb://admin:admin@localhost:27017/?authSource=admin"
+export MONGODB_DB="auctions_test"
+```
+
+**Alternativa**: Você pode criar um arquivo `.env.test` ou configurar essas variáveis diretamente no comando:
+
+```bash
+MONGODB_URL="mongodb://admin:admin@localhost:27017/?authSource=admin" \
+MONGODB_DB="auctions_test" \
+go test -v ./internal/infra/database/auction -run TestCreateAuction_AutomaticClosure
+```
+
+**Nota**: Se as variáveis de ambiente não forem configuradas, o teste usará os valores padrão (`mongodb://admin:admin@localhost:27017/?authSource=admin` e `auctions`), o que pode afetar o banco de desenvolvimento.
+
 ### Teste de Fechamento Automático de Leilões
 
 O arquivo `internal/infra/database/auction/create_auction_test.go` contém testes que validam o fechamento automático dos leilões.
@@ -178,23 +208,31 @@ O teste valida que a goroutine em `CreateAuction` está funcionando corretamente
 
 #### Como Executar o Teste
 
-**Pré-requisito**: Certifique-se de que o MongoDB está rodando (pode ser via `docker-compose up mongodb` ou uma instância local).
+**Pré-requisitos**: 
+- Certifique-se de que o MongoDB está rodando
+- Configure as variáveis de ambiente para apontar para um banco de testes (veja seção acima)
 
 Execute o teste com o comando:
 
 ```bash
+MONGODB_URL="mongodb://admin:admin@localhost:27017/?authSource=admin" \
+MONGODB_DB="auctions_test" \
 go test -v ./internal/infra/database/auction -run TestCreateAuction_AutomaticClosure
 ```
 
 **Executar todos os testes do pacote:**
 
 ```bash
+MONGODB_URL="mongodb://admin:admin@localhost:27017/?authSource=admin" \
+MONGODB_DB="auctions_test" \
 go test -v ./internal/infra/database/auction
 ```
 
 **Executar com cobertura:**
 
 ```bash
+MONGODB_URL="mongodb://admin:admin@localhost:27017/?authSource=admin" \
+MONGODB_DB="auctions_test" \
 go test -v -cover ./internal/infra/database/auction -run TestCreateAuction_AutomaticClosure
 ```
 
@@ -203,7 +241,7 @@ go test -v -cover ./internal/infra/database/auction -run TestCreateAuction_Autom
 - **Intervalo configurado**: O teste define `AUCTION_INTERVAL=2s` para acelerar a execução
 - **Tempo de espera**: O teste aguarda 3 segundos (intervalo + buffer)
 - **Limpeza**: O teste limpa a coleção antes e depois da execução
-- **Conexão MongoDB**: Usa variáveis de ambiente ou valores padrão se não configuradas
+- **Conexão MongoDB**: Usa variáveis de ambiente (`MONGODB_URL` e `MONGODB_DB`) ou valores padrão se não configuradas
 
 #### Exemplo de Saída Esperada
 
@@ -223,4 +261,3 @@ ok  	fullcycle-auction_go/internal/infra/database/auction	5.037s
 - **MongoDB**: Banco de dados NoSQL
 - **Docker**: Containerização
 - **Docker Compose**: Orquestração de containers
-
