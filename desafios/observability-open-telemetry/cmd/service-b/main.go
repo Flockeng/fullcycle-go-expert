@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
@@ -19,6 +20,9 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"golang.org/x/text/runes"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
 )
 
 var tracer = otel.Tracer("service-b")
@@ -199,7 +203,7 @@ func fetchTemperature(ctx context.Context, city string, state string, country st
 		return 0, fmt.Errorf("missing WEATHER_API_KEY")
 	}
 
-	query := city + "," + state + "," + country
+	query := removeAccents(city) + "," + removeAccents(state) + "," + country
 	query = strings.ReplaceAll(query, " ", "%20")
 	url := fmt.Sprintf("https://api.weatherapi.com/v1/current.json?key=%s&q=%s", apiKey, query)
 
@@ -236,6 +240,12 @@ func fetchTemperature(ctx context.Context, city string, state string, country st
 	}
 
 	return weatherResponse.Current.TempC, nil
+}
+
+func removeAccents(s string) string {
+	t := transform.Chain(norm.NFD, runes.Remove(runes.In(unicode.Mn)), norm.NFC)
+	result, _, _ := transform.String(t, s)
+	return result
 }
 
 func round(value float64, precision int) float64 {
