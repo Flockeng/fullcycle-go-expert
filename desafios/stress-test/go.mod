@@ -1,3 +1,3 @@
-module github.com/simflock/stress-test
+module stress-test
 
 go 1.20
