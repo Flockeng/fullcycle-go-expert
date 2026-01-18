@@ -138,4 +138,4 @@ type Storage interface {
 
 ## 🧪 Testes
 
-Para informações detalhadas sobre como executar os testes, cobertura de testes e estratégia de testes do projeto, consulte o [Guia de Testes](TESTING.md).
+Para informações detalhadas sobre como executar os testes, consulte o [Guia de Testes](TESTING.md).
